@@ -314,7 +314,8 @@ struct Joint {
     	     */
     	    std::vector<std::shared_ptr<fcl::CollisionObject>> collision_objects_;
     	    
-    	    std::shared_ptr<shared::RBDLInterface> rbdl_interface_;
+    	    std::shared_ptr<shared::RBDLInterface> rbdl_interface_;   	    
+    	    
     };
     		
 }

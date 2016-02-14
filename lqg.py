@@ -28,7 +28,7 @@ class LQG:
             """
             Generate a random seed that will be stored
             """
-            self.seed = np.random.randint(0, 4294967295)
+            self.seed = np.random.randint(0, 4294967)
         np.random.seed(self.seed)  
         
         logging_level = logging.WARN

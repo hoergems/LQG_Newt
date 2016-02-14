@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.6)
 
 project (lqg)
 set(CMAKE_BUILD_TYPE DEBUG)
-set(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++11 -O3 -w")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -std=c++11 -O3 -w")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -std=c++11 -O3 -w -fopenmp -mavx -mfma -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-g -std=c++11 -O3 -w -fopenmp -mavx -mfma -DNDEBUG")
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${lqg_SOURCE_DIR})
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${lqg_SOURCE_DIR}/../)
@@ -79,7 +79,9 @@ if(PKG_CONFIG_FOUND)
     if(NOT EIGEN_FOUND)
        message(FATAL_ERROR "EIGEN could not be found")
     endif()
-    include_directories(${EIGEN_INCLUDE_DIRS})    
+    include_directories(${EIGEN_INCLUDE_DIRS}) 
+    message("Eigen include dirs: ${EIGEN_INCLUDE_DIRS}")
+    message("Eigen library dirs: ${EIGEN_LIBRARY_DIRS}")   
 endif()
 
 

@@ -477,10 +477,22 @@ void Robot::initCollisionObjects() {
 }
 
 void Robot::createRobotCollisionObjects(const std::vector<double> &joint_angles, 
-		                                std::vector<std::shared_ptr<fcl::CollisionObject>> &collision_objects) {		                                	
+		                                std::vector<std::shared_ptr<fcl::CollisionObject>> &collision_objects) {
+	Eigen::MatrixXd res = Eigen::MatrixXd::Identity(4, 4);	
+	res << 1.0, 0.0, 0.0, joint_origins_[0][0], 
+			      0.0, 1.0, 0.0, joint_origins_[0][1],
+			      0.0, 0.0, 1.0, joint_origins_[0][2],
+				  0.0, 0.0, 0.0, 1.0;
 	for (size_t i = 0; i < joint_angles.size(); i++) {		
-		const std::pair<fcl::Vec3f, fcl::Matrix3f> pose_link_n = kinematics_->getPoseOfLinkN(joint_angles, i);
-		fcl::Transform3f trans(pose_link_n.second, pose_link_n.first); 
+		//const std::pair<fcl::Vec3f, fcl::Matrix3f> pose_link_n = kinematics_->getPoseOfLinkN(joint_angles, i);
+		res = kinematics_->getPoseOfLinkN(joint_angles[i], res, i);	
+		
+		fcl::Matrix3f trans_matrix(res(0,0), res(0,1), res(0,2),
+				                   res(1,0), res(1,1), res(1,2),
+								   res(2,0), res(2,1), res(2,2));
+		fcl::Vec3f trans_vec(res(0,3), res(1,3), res(2,3));
+		
+		fcl::Transform3f trans(trans_matrix, trans_vec); 
 		
 		
 		fcl::AABB link_aabb(fcl::Vec3f(0.0, 

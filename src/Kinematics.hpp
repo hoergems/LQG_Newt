@@ -24,6 +24,10 @@ namespace shared {
             
             std::pair<fcl::Vec3f, fcl::Matrix3f> getPoseOfLinkN(const std::vector<double> &joint_angles, const int &n) const;
             
+            Eigen::MatrixXd getPoseOfLinkN(const double &joint_angle, 
+            		                       Eigen::MatrixXd &current_transform, 
+										   unsigned int &n) const;
+            
             std::pair<fcl::Vec3f, fcl::Matrix3f> getEndEffectorPose(const std::vector<double> &joint_angles) const;
             
             void setJointOrigins(std::vector<std::vector<double>> &joint_origins);
