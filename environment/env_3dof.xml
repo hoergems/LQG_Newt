@@ -9,6 +9,19 @@
      </Geom>
    </Body>
   </KinBody>
+  <!--AttachedSensor name="laser">
+      <link>Floor</link>
+      <translation>0.2 0 -0.1</translation>
+      <sensor type="BaseLaser2D">
+        <min_angle>-135</min_angle>
+        <max_angle>135</max_angle>
+        <resolution>0.35</resolution>
+        <min_range>0.01</min_range>
+        <max_range>5</max_range>
+        <time_scan>0.1</time_scan>
+        <color>0.5 0.5 1</color>
+      </sensor>
+    </AttachedSensor-->
 
   <KinBody name="GoalArea">
     <Body type="static" name="GoalAreaBody" enable="false">
@@ -19,18 +32,24 @@
      	<ambientColor>0.1 0.9 0.1</ambientColor>
       </Geom>
     </Body>
-  </KinBody>  
+  </KinBody> 
+   
   <KinBody name="obst2">
-    <Body type="static" name="obst2_link" enable="true">
+    <Body type="dynamic" name="obst2_link" enable="true">
       <Geom type="box">
         <Translation>0.0 2.7 4.0</Translation>
         <extents>0.2 1.0 1.2</extents>
       </Geom> 
-      <Terrain name="grass">
+      <!--Terrain name="grass">
           <Damping>1.0</Damping>
           <Cost>0.0</Cost>
           <Traversable>false</Traversable>
-      </Terrain>     
+      </Terrain-->     
     </Body>
-  </KinBody> 
+  </KinBody>
+  
+  <sensor name="mysensor_blubb" file="/home/marcus/LQG_Newt/environment/sensor.xml">
+      <translation>0 1 5</translation>
+      <rotationaxis>1 0 0 45</rotationaxis>
+  </sensor> 
 </Environment>

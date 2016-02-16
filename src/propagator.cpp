@@ -89,12 +89,12 @@ bool Propagator::propagate_nonlinear(const std::vector<double> &current_joint_va
 		state.push_back(current_joint_velocities[i]);		
 	}
 	
-	std::vector<double> integration_result;
+	//std::vector<double> integration_result;
 	std::vector<double> inte_times({0.0, duration, simulation_step_size});	
-	integrator_->do_integration(state, control, control_error_vec, inte_times, integration_result);
+	integrator_->do_integration(state, control, control_error_vec, inte_times, result);
 	
 	
-	std::vector<double> newJointValues;
+	/**std::vector<double> newJointValues;
 	std::vector<double> newJointVelocities;
 	
 	for (size_t i = 0; i < integration_result.size() / 2; i++) {
@@ -103,29 +103,30 @@ bool Propagator::propagate_nonlinear(const std::vector<double> &current_joint_va
 	
 	for (size_t i = integration_result.size() / 2; i < integration_result.size(); i++) {
 		newJointVelocities.push_back(integration_result[i]);		
-	}
+	}*/
 	
 	//Enforce position and velocity limits
+	unsigned int ir_size = result.size() / 2;
 	bool legal = true;
 	if (enforce_constraints_) {		
-		for (unsigned int i = 0; i < newJointValues.size(); i++) {
-			if (newJointValues[i] < jointsLowerPositionLimit_[i]) {
+		for (unsigned int i = 0; i < ir_size; i++) {
+			if (result[i] < jointsLowerPositionLimit_[i]) {
 				legal = false;	    	
-				newJointValues[i] = jointsLowerPositionLimit_[i];
-				newJointVelocities[i] = 0;				
+				result[i] = jointsLowerPositionLimit_[i];
+				result[i + ir_size] = 0;				
 			}
-			else if (newJointValues[i] > jointsUpperPositionLimit_[i]) {
+			else if (result[i] > jointsUpperPositionLimit_[i]) {
 				legal = false;			
-				newJointValues[i] = jointsUpperPositionLimit_[i];
-				newJointVelocities[i] = 0;
+				result[i] = jointsUpperPositionLimit_[i];
+				result[i + ir_size] = 0;
 			}
 	
-			if (newJointVelocities[i] < -jointsVelocityLimit_[i]) {
-				newJointVelocities[i] = -jointsVelocityLimit_[i];
+			if (result[i + ir_size] < -jointsVelocityLimit_[i]) {
+				result[i + ir_size] = -jointsVelocityLimit_[i];
 				legal = false;
 			}
-			else if (newJointVelocities[i] > jointsVelocityLimit_[i]) {
-				newJointVelocities[i] = jointsVelocityLimit_[i];
+			else if (result[i + ir_size] > jointsVelocityLimit_[i]) {
+				result[i + ir_size] = jointsVelocityLimit_[i];
 				legal = false;
 			}		        
 		}
@@ -139,15 +140,15 @@ bool Propagator::propagate_nonlinear(const std::vector<double> &current_joint_va
 		else if (newJointValues[i] < -M_PI) {
 			newJointValues[i] = newJointValues[i] + 2.0 * M_PI;
 		}
-	}*/
+	}*/	
 	
-	for (size_t i = 0; i < newJointValues.size(); i++) {
+	/**for (size_t i = 0; i < newJointValues.size(); i++) {
 		result.push_back(newJointValues[i]);
 	}
 	
 	for (size_t i = 0; i < newJointVelocities.size(); i++) {
 		result.push_back(newJointVelocities[i]);
-	}
+	}*/
 	
 	return legal;
 }

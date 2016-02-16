@@ -46,7 +46,8 @@ class LQG:
             return
         #self.show_state_distribution(urdf_model_file, environment_file)
         #self.check_continuous_collide(self.robot_file, self.environment_file)
-        if show_scene:            
+        if show_scene:
+            self.test_sensor(self.robot_file, self.environment_file, self.abs_path + "/model/sensor.xml")            
             self.run_viewer(self.robot_file, self.environment_file)
         self.clear_stats(dir)
         logging.info("Start up simulator")
@@ -543,8 +544,18 @@ class LQG:
                                           particle_joint_values,
                                           particle_joint_values)
             #time.sleep(10)
-            time.sleep(0.03) 
-            
+            time.sleep(0.03)
+             
+    def test_sensor(self, model_file, env_file, sensor_file):
+        show_viewer = True
+        if show_viewer:
+            self.robot.setViewerBackgroundColor(0.6, 0.8, 0.6)
+            self.robot.setViewerSize(1280, 768)
+            self.robot.setupViewer(model_file, env_file) 
+            self.robot.addSensor(sensor_file)
+        while True:
+            time.sleep(1.0)
+            print "hello"   
         
     def run_viewer(self, model_file, env_file):        
         show_viewer = True
@@ -578,7 +589,7 @@ class LQG:
         y = 0
         while True:
             u_in = [0.0 for i in xrange(self.robot_dof)]
-            u_in[0] = 1.0
+            u_in[0] = 150.0
             current_state = v_double()            
             current_state[:] = x            
             control = v_double()            
@@ -587,13 +598,13 @@ class LQG:
             ce = [0.0 for i in xrange(self.robot_dof)]
             control_error[:] = ce
             result = v_double()
-            t0 = time.time()
+            
             
             ###########################
             ee_jacobian = v2_double()            
             self.robot.getEndEffectorJacobian(current_state, ee_jacobian);            
             ###########################
-                                
+            t0 = time.time()                    
             self.robot.propagate(current_state,
                                  control,
                                  control_error,
@@ -603,7 +614,7 @@ class LQG:
             #print result[11]          
             t = time.time() - t0
             integration_times.append(t)
-            if y == 10000000:
+            if y == 1000:
                 t_sum = sum(integration_times)
                 t_mean = t_sum / len(integration_times)
                 print "mean integration times: " + str(t_mean)

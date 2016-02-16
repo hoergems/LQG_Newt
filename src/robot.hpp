@@ -222,6 +222,8 @@ struct Joint {
     	    void removePermanentViewerParticles();
     	        	    
     	    void setupViewer(std::string model_file, std::string environment_file);
+    	    
+    	    void addSensor(std::string sensor_file);
 #endif
         private:
     	    std::vector<shared::Link> links_;
@@ -314,8 +316,7 @@ struct Joint {
     	     */
     	    std::vector<std::shared_ptr<fcl::CollisionObject>> collision_objects_;
     	    
-    	    std::shared_ptr<shared::RBDLInterface> rbdl_interface_;   	    
-    	    
+    	    std::shared_ptr<shared::RBDLInterface> rbdl_interface_;
     };
     		
 }

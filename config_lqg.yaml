@@ -35,8 +35,8 @@ max_velocity: 4.0
 control_rate: 30.0
 
 # The initial joint angles (has to be consistent with the number of links)
-#start_state: [0.7, 0.0, 1.5, 0.0, 0.0, 0.0]
-start_state: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+start_state: [0.7, 0.0, 1.5, 0.0, 0.0, 0.0]
+#start_state: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 #Number of bins for the histograms
 num_bins: 201
@@ -116,7 +116,7 @@ acceleration_limit: 100.0
 simulation_step_size: 0.001
 
 # Control sampler to use. 'discrete' or 'continuous'
-control_sampler: continuous
+control_sampler: discrete
 
 # Number of controls to sample at the nearest node in the RRT tree
 num_control_samples: 1

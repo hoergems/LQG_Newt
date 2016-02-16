@@ -203,14 +203,9 @@ void Integrate::do_integration(std::vector<double> &x,
 	rho_ = control;
 	zeta_ = control_error;
 	
-	size_t k = integrate_const(adams_bashforth<2, state_type>() ,
+	size_t k = integrate_const(bulirsch_stoer<state_type>() ,
 		                       std::bind(&Integrate::ode , this , pl::_1 , pl::_2 , pl::_3),
-		                       x , t0 , te , step_size);
-	/**cout << "result: ";
-	for (size_t i = 0; i < x.size(); i++) {
-		cout << x[i] << ", ";
-	}
-	cout << endl;*/
+		                       x , t0 , te , step_size);	
 	result = x;
 }
 
@@ -254,14 +249,16 @@ void Integrate::ode(const state_type &x , state_type &dxdt , double t) const {
 	if (rbdl_interface_) {		
 		VectorXd res = VectorXd::Zero(x.size() / 2);
 		std::vector<double> q;
-		std::vector<double> qdot;		
+		std::vector<double> qdot;
+		std::vector<double> rho;
 		for (size_t i = 0; i < x.size() / 2; i++) {
 			q.push_back(x[i]);
 			qdot.push_back(x[i + x.size() / 2]);
 			dxdt.push_back(x[i + x.size() / 2]);
+			rho.push_back(rho_[i] + zeta_[i]);
 		}
 		
-		rbdl_interface_->forward_dynamics(q, qdot, rho_, res);		
+		rbdl_interface_->forward_dynamics(q, qdot, rho, res);		
 		for (size_t i = 0; i < x.size() / 2; i++) {
 			dxdt.push_back(res(i));
 		}	

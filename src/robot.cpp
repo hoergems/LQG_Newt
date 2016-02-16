@@ -365,15 +365,18 @@ Robot::Robot(std::string robot_file):
 			           active_joint_velocity_limits_,
 					   enforce_constraints_);
 	kinematics_->setJointOrigins(joint_origins_);
-	kinematics_->setJointAxis(joint_axes_);
+	cout << "joint origins size: " << joint_origins_.size() << endl;
+	//kinematics_->setJointAxis(joint_axes_);
 	kinematics_->setLinkDimensions(active_link_dimensions_);
+	cout << "active_link_dimensions_" << active_link_dimensions_.size() << endl;
 	
 	rbdl_interface_->load_model(robot_file);
     propagator_->getIntegrator()->setRBDLInterface(rbdl_interface_);
 	rbdl_interface_->setViscous(joint_dampings_);
 	rbdl_interface_->setPositionConstraints(lower_joint_limits_, upper_joint_limits_);
 	propagator_->getIntegrator()->setJointDamping(joint_dampings_);
-	initCollisionObjects();
+	//initCollisionObjects();
+	
 }
 
 void Robot::quatFromRPY(double &roll, double &pitch, double &yaw, std::vector<double> &quat) {
@@ -483,7 +486,7 @@ void Robot::createRobotCollisionObjects(const std::vector<double> &joint_angles,
 			      0.0, 1.0, 0.0, joint_origins_[0][1],
 			      0.0, 0.0, 1.0, joint_origins_[0][2],
 				  0.0, 0.0, 0.0, 1.0;
-	for (size_t i = 0; i < joint_angles.size(); i++) {		
+	for (unsigned int i = 0; i < joint_angles.size(); i++) {		
 		//const std::pair<fcl::Vec3f, fcl::Matrix3f> pose_link_n = kinematics_->getPoseOfLinkN(joint_angles, i);
 		res = kinematics_->getPoseOfLinkN(joint_angles[i], res, i);	
 		
@@ -610,6 +613,11 @@ void Robot::setViewerBackgroundColor(double r, double g, double b) {
 void Robot::setViewerCameraTransform(std::vector<double> &rot, std::vector<double> &trans) {
 	viewer_->setCameraTransform(rot, trans);
 }
+
+void Robot::addSensor(std::string sensor_file) {
+	viewer_->addSensor(sensor_file);
+}
+
 #endif
 
 bool Robot::propagate_linear(std::vector<double> &current_state,
@@ -985,6 +993,7 @@ BOOST_PYTHON_MODULE(librobot) {
 					    .def("setViewerCameraTransform", &Robot::setViewerCameraTransform)
 					    .def("addPermanentViewerParticles", &Robot::addPermanentViewerParticles)
 					    .def("removePermanentViewerParticles", &Robot::removePermanentViewerParticles)
+					    .def("addSensor", &Robot::addSensor)
 #endif
                         //.def("setup", &Integrate::setup)                        
     ;
