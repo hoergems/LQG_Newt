@@ -24,7 +24,7 @@
     </AttachedSensor-->
 
   <KinBody name="GoalArea">
-    <Body type="static" name="GoalAreaBody" enable="false">
+    <Body type="static" name="GoalAreaBody" enable="true">
       <Geom type="sphere">
         <Translation>-1.8826964422074735 1.5857733372105343 4.0</Translation>
         <Radius>0.3</Radius>
@@ -48,7 +48,7 @@
     </Body>
   </KinBody>
   
-  <sensor name="mysensor_blubb" file="/home/marcus/LQG_Newt/environment/sensor.xml">
+  <sensor name="mysensor_blubb" file="/home/hoe01h/LQG_Newt/environment/sensor_BaseFlashLidar3D.xml">
       <translation>0 1 5</translation>
       <rotationaxis>1 0 0 45</rotationaxis>
   </sensor> 

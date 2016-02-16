@@ -29,6 +29,8 @@ namespace shared {
             		                       Eigen::MatrixXd &current_transform, 
 										   unsigned int &n) const;
             
+            Eigen::MatrixXd getEndEffectorPose(const std::vector<double> &joint_angles, bool &eigen);
+            
             std::pair<fcl::Vec3f, fcl::Matrix3f> getEndEffectorPose(const std::vector<double> &joint_angles) const;
             
             void setJointOrigins(std::vector<std::vector<double>> &joint_origins);

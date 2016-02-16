@@ -120,8 +120,9 @@ def main(env,options):
     while True:
         #sensors = env.GetSensors() 
         sensors = [env.GetSensor("mysensor_blubb")]
+        
         print enumerate(sensors)     
-        for i,sensor in enumerate(sensors):
+        '''for i,sensor in enumerate(sensors):
             if i==ienablesensor:
                 print "PWER ON"
                 sensor.Configure(Sensor.ConfigureCommand.PowerOn)
@@ -129,19 +130,22 @@ def main(env,options):
             else:
                 print "POWER OFF"
                 sensor.Configure(Sensor.ConfigureCommand.PowerOff)
-                sensor.Configure(Sensor.ConfigureCommand.RenderDataOff)
-        print "conf"
-        print 'showing sensor %s, try moving obstacles'%(sensors[ienablesensor].GetName())
+                sensor.Configure(Sensor.ConfigureCommand.RenderDataOff)'''
+        sensors[0].Configure(Sensor.ConfigureCommand.PowerOn)
+        sensors[0].Configure(Sensor.ConfigureCommand.RenderDataOn)        
+        time.sleep(20)
+        '''print 'showing sensor %s, try moving obstacles'%(sensors[ienablesensor].GetName())
         if sensors[ienablesensor].Supports(Sensor.Type.Laser):
             # if laser, wait for the sensor data to be updated and then print it
-            olddata = sensors[ienablesensor].GetSensorData(Sensor.Type.Laser)
+            #olddata = sensors[ienablesensor].GetSensorData(Sensor.Type.Laser)
             while True:
                 data = sensors[ienablesensor].GetSensorData(Sensor.Type.Laser)
                 if data.stamp != olddata.stamp:
                     break
                 time.sleep(0.1)
-            print 'sensor data: ',data.ranges                        
-        time.sleep(5)
+            print 'sensor data: ',data.ranges 
+            time.sleep(5)                       
+        time.sleep(5)'''
         ienablesensor = (ienablesensor+1)%len(sensors)
 
 from optparse import OptionParser

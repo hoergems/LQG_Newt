@@ -552,9 +552,46 @@ class LQG:
             self.robot.setViewerBackgroundColor(0.6, 0.8, 0.6)
             self.robot.setViewerSize(1280, 768)
             self.robot.setupViewer(model_file, env_file) 
-            self.robot.addSensor(sensor_file)
+            #self.robot.addSensor(sensor_file)
+        x = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        u = [0.0, 0.0, 0.0]
+        u_err = [0.0, 0.0, 0.0]
+        
+        current_state = v_double()
+        control = v_double()
+        control[:] = u
+        
+        control_error = v_double()
+        control_error[:] = u_err
+        
+        result = v_double()
+        angles = v_double()
+        self.robot.setSensorTransform(current_state)
         while True:
-            time.sleep(1.0)
+            current_state[:] = x
+            self.robot.propagate(current_state,
+                                 control,
+                                 control_error,
+                                 self.simulation_step_size,
+                                 0.03,
+                                 result)            
+            angles[:] = [result[i] for i in xrange(len(result) / 2)]
+            self.robot.setSensorTransform(angles) 
+            x = np.array([result[i] for i in xrange(len(result))])
+            cjvals = v_double()
+            cjvels = v_double()
+            cjvals_arr = [x[i] for i in xrange(len(x) / 2)]
+            cjvels_arr = [x[i] for i in xrange(len(x) / 2, len(x))]
+            cjvals[:] = cjvals_arr
+            cjvels[:] = cjvels_arr
+            particle_joint_values = v2_double()
+            if show_viewer:                
+                self.robot.updateViewerValues(cjvals, 
+                                              cjvels,
+                                              particle_joint_values,
+                                              particle_joint_values)
+            time.sleep(0.03)
+            
             print "hello"   
         
     def run_viewer(self, model_file, env_file):        
@@ -585,12 +622,12 @@ class LQG:
         integration_times = [] 
         collision_check_times1 = []
         collision_check_times2 = []     
-        
+        current_state = v_double()
         y = 0
         while True:
             u_in = [0.0 for i in xrange(self.robot_dof)]
             u_in[0] = 150.0
-            current_state = v_double()            
+                        
             current_state[:] = x            
             control = v_double()            
             control[:] = u_in

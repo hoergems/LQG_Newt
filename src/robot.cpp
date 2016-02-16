@@ -481,11 +481,11 @@ void Robot::initCollisionObjects() {
 
 void Robot::createRobotCollisionObjects(const std::vector<double> &joint_angles, 
 		                                std::vector<std::shared_ptr<fcl::CollisionObject>> &collision_objects) {
-	Eigen::MatrixXd res = Eigen::MatrixXd::Identity(4, 4);	
-	res << 1.0, 0.0, 0.0, joint_origins_[0][0], 
-			      0.0, 1.0, 0.0, joint_origins_[0][1],
-			      0.0, 0.0, 1.0, joint_origins_[0][2],
-				  0.0, 0.0, 0.0, 1.0;
+	Eigen::MatrixXd res = Eigen::MatrixXd::Identity(4, 4);
+	res(0, 3) = joint_origins_[0][0];
+	res(1, 3) = joint_origins_[0][1];
+	res(2, 3) = joint_origins_[0][2];
+	
 	for (unsigned int i = 0; i < joint_angles.size(); i++) {		
 		//const std::pair<fcl::Vec3f, fcl::Matrix3f> pose_link_n = kinematics_->getPoseOfLinkN(joint_angles, i);
 		res = kinematics_->getPoseOfLinkN(joint_angles[i], res, i);	
@@ -616,6 +616,12 @@ void Robot::setViewerCameraTransform(std::vector<double> &rot, std::vector<doubl
 
 void Robot::addSensor(std::string sensor_file) {
 	viewer_->addSensor(sensor_file);
+}
+
+void Robot::setSensorTransform(std::vector<double> &joint_angles) {
+	bool b = true;
+	Eigen::MatrixXd end_effector_pose = kinematics_->getEndEffectorPose(joint_angles, b);
+	viewer_->setSensorTransform(end_effector_pose);
 }
 
 #endif
@@ -994,6 +1000,7 @@ BOOST_PYTHON_MODULE(librobot) {
 					    .def("addPermanentViewerParticles", &Robot::addPermanentViewerParticles)
 					    .def("removePermanentViewerParticles", &Robot::removePermanentViewerParticles)
 					    .def("addSensor", &Robot::addSensor)
+						.def("setSensorTransform", &Robot::setSensorTransform)
 #endif
                         //.def("setup", &Integrate::setup)                        
     ;

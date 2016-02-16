@@ -224,6 +224,8 @@ struct Joint {
     	    void setupViewer(std::string model_file, std::string environment_file);
     	    
     	    void addSensor(std::string sensor_file);
+    	    
+    	    void setSensorTransform(std::vector<double> &joint_angles);
 #endif
         private:
     	    std::vector<shared::Link> links_;
