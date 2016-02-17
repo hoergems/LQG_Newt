@@ -48,7 +48,7 @@
     </Body>
   </KinBody>
   
-  <sensor name="mysensor_blubb" file="/home/hoe01h/LQG_Newt/environment/sensor_BaseFlashLidar3D.xml">
+  <sensor name="mysensor_blubb" file="/home/hoe01h/LQG_Newt/environment/sensor_BaseLaser2D.xml">
       <translation>0 1 5</translation>
       <rotationaxis>1 0 0 45</rotationaxis>
   </sensor> 
