@@ -486,7 +486,7 @@ void Robot::createRobotCollisionObjects(const std::vector<double> &joint_angles,
 	res(1, 3) = joint_origins_[0][1];
 	res(2, 3) = joint_origins_[0][2];
 	
-	for (unsigned int i = 0; i < joint_angles.size(); i++) {		
+	for (size_t i = 0; i < joint_angles.size(); i++) {		
 		//const std::pair<fcl::Vec3f, fcl::Matrix3f> pose_link_n = kinematics_->getPoseOfLinkN(joint_angles, i);
 		res = kinematics_->getPoseOfLinkN(joint_angles[i], res, i);	
 		

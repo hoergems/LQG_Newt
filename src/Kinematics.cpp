@@ -71,7 +71,7 @@ Eigen::MatrixXd Kinematics::getEndEffectorPose(const std::vector<double> &joint_
 
 Eigen::MatrixXd Kinematics::getPoseOfLinkN(const double &joint_angle, 
 		                                   Eigen::MatrixXd &current_transform, 
-										   unsigned int &n) const {
+										   size_t &n) const {
 	Eigen::MatrixXd new_trans;
 	if (n == 0) {
 		new_trans = getTransformationMatr(joint_angle, 0.0, 0.0, 0.0);		

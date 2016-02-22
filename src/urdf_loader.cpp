@@ -1,4 +1,4 @@
-#include "urdf_loader.hpp"
+#include "include/urdf_loader.hpp"
 //#include "boostfs_helpers.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -84,21 +84,21 @@ std::pair<OpenRAVE::KinBody::JointType, bool> URDFLoader::URDFJointTypeToRaveJoi
 }
 
 void URDFLoader::ParseURDF(
-        urdf::Model &model,
+        urdf::ModelInterfaceSharedPtr &model,
         std::vector<OpenRAVE::KinBody::LinkInfoPtr> &link_infos,
         std::vector<OpenRAVE::KinBody::JointInfoPtr> &joint_infos)
   {
     // Populate list of links from URDF model. We'll force the root link to be
     // first.
     std::vector<boost::shared_ptr<urdf::Link> > link_vector;
-    model.getLinks(link_vector);
+    model->getLinks(link_vector);
 
     std::list<boost::shared_ptr<urdf::Link const> > link_list;
     std::set<std::string> finished_links;
 
-    link_list.insert(link_list.begin(), model.getRoot());
+    link_list.insert(link_list.begin(), model->getRoot());
     BOOST_FOREACH (boost::shared_ptr<urdf::Link> link, link_vector) {
-        if (link != model.getRoot()) {
+        if (link != model->getRoot()) {
             link_list.insert(link_list.end(), link);
         }
     }
@@ -137,7 +137,7 @@ void URDFLoader::ParseURDF(
         link_info->_t = URDFPoseToRaveTransform(
                 parent_joint->parent_to_joint_origin_transform) * link_info->_t;
         boost::shared_ptr<urdf::Link const> parent_link
-                = model.getLink(parent_joint->parent_link_name);
+                = model->getLink(parent_joint->parent_link_name);
         parent_joint = parent_link->parent_joint;
       }
       
@@ -284,7 +284,7 @@ void URDFLoader::ParseURDF(
 
     // Parse the joint properties
     std::vector<boost::shared_ptr<urdf::Joint> > ordered_joints;
-    BOOST_FOREACH(boost::tie(joint_name, joint_ptr), model.joints_) {
+    BOOST_FOREACH(boost::tie(joint_name, joint_ptr), model->joints_) {
         ordered_joints.push_back(joint_ptr);
     }
 
@@ -364,9 +364,9 @@ OpenRAVE::KinBodyPtr URDFLoader::load(std::string model_file,
 		                              OpenRAVE::EnvironmentBasePtr &env) {	
 	std::string name;
 
-	// Load the URDF file.
-	urdf::Model urdf_model;
-	if (!urdf_model.initFile(model_file)) {
+	// Load the URDF file.	
+	urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDFFile(model_file);
+	if (!urdf_model) {
 	    throw OpenRAVE::openrave_exception("Failed to open URDF file.");
 	}
 
@@ -387,7 +387,7 @@ OpenRAVE::KinBodyPtr URDFLoader::load(std::string model_file,
 	body->Init(link_infos_const, joint_infos_const);
 	        
 
-    body->SetName(urdf_model.getName());
+    body->SetName(urdf_model->getName());
 	
 	         
 	return body;

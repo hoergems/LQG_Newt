@@ -4,7 +4,9 @@
 #include <openrave-core.h>
 #include <openrave/environment.h>
 #include <boost/bind.hpp>
-#include <urdf/model.h>
+#include <urdf_model/model.h>
+#include <urdf_world/types.h>
+#include <urdf_parser/urdf_parser.h>
 
 
 namespace shared {
@@ -16,7 +18,7 @@ namespace shared {
     	
     		OpenRAVE::KinBodyPtr load(std::string model_file, OpenRAVE::EnvironmentBasePtr &env);
     	
-    	    void ParseURDF(urdf::Model &model, 
+    	    void ParseURDF(urdf::ModelInterfaceSharedPtr &model, 
     	    		       std::vector<OpenRAVE::KinBody::LinkInfoPtr> &link_infos,
     	                   std::vector<OpenRAVE::KinBody::JointInfoPtr> &joint_infos);
     	    

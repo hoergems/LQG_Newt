@@ -3,16 +3,29 @@ import glob
 import argparse
 import numpy as np
 import time
-from librobot import Robot, v_double, v2_double
-from libutil import *
-from libobstacle import *
+
+from libopenrave_interface import Environment, v_double, v2_double
 
 class Play:
     def __init__(self, algorithm, dir, numb, play_failed):
-        robot_files = glob.glob(os.path.join(os.path.join(dir + "/model/", "*.urdf")))
-        environment_files = glob.glob(os.path.join(os.path.join(dir + "/environment/", "*.xml")))
+        config_file = glob.glob(os.path.join(dir + "/config_*"))
+        robot_filename = ""
+        environment_filename = ""
+        with open(config_file[0], "r") as f:
+            for line in f.readlines():
+                if "robot_file:" in line:
+                    robot_filename = line.split(":")[1].strip()
+                elif "environment_file:" in line:
+                    environment_filename = line.split(":")[1].strip()
+                    
         
-        self.utils = Utils()
+                    
+        
+        robot_files = glob.glob(os.path.join(os.path.join(dir + "/model/", robot_filename)))
+        print robot_files
+        environment_files = glob.glob(os.path.join(os.path.join(dir + "/environment/", environment_filename)))
+        
+        
         
         if len(robot_files) > 1:
             print "Error: Multiple robot files found"
@@ -21,9 +34,8 @@ class Play:
             print "Error: Multiple environment files found" 
             return False
         self.robot_file = robot_files[0]
-        self.environment_file = environment_files[0]
+        self.environment_file = environment_files[0]        
         
-        self.viewer_initialized = False
         if algorithm == None:
             print "No algorithm provided. Use the -a flag"
             return
@@ -34,9 +46,7 @@ class Play:
             print "Provided directory doesn't exist"
             return       
         if numb == None:
-            numb = 0
-        if not self.init_robot():
-            return
+            numb = 0        
         if not self.init_environment():
             return
         print "PLAY"
@@ -55,11 +65,13 @@ class Play:
         
     def play_runs(self, dir, algorithm, numb, play_failed):      
         files = glob.glob(os.path.join(os.path.join(dir, "*.log")))
+        print files
         log_files = []
         for file in files:
             file_str = file.split("/")[-1]
             if algorithm in file_str:
-                log_files.append(file)        
+                log_files.append(file) 
+        
         with open(sorted(log_files)[numb]) as f:
             states = []
             all_particles = []
@@ -123,11 +135,8 @@ class Play:
                     all_particles = []
                     
     def show_nominal_path(self, path):
-        """ Shows the nominal path in the viewer """
-        if not self.viewer_initialized:
-            self.robot.setupViewer(self.robot_file, self.environment_file)
-            self.viewer_initialized = True
-        self.robot.removePermanentViewerParticles()
+        """ Shows the nominal path in the viewer """       
+        self.environment.removePermanentParticles()
         particle_joint_values = v2_double()
         particle_joint_colors = v2_double()
         pjvs = []
@@ -140,16 +149,14 @@ class Play:
             color[:] = [0.0, 0.0, 0.0, 0.7]
             particle_joint_colors.append(color)            
         particle_joint_values[:] = pjvs
-        self.robot.addPermanentViewerParticles(particle_joint_values,
-                                               particle_joint_colors)
+        self.environment.plotPermanentParticles(particle_joint_values,
+                                                particle_joint_colors)
                     
-    def play_states(self, states, col, particles):        
-        if not self.viewer_initialized:
-            self.robot.setupViewer(self.robot_file, self.environment_file)
-            self.viewer_initialized = True
+    def play_states(self, states, col, particles):
         for i in xrange(len(states)):
             cjvals = v_double()
             cjvels = v_double()
+            print "states[i] " + str(states[i])
             cjvals_arr = [states[i][j] for j in xrange(len(states[i]) / 2)]
             cjvels_arr = [states[i][j] for j in xrange(len(states[i]) / 2, len(states[i]))]
             cjvals[:] = cjvals_arr
@@ -165,14 +172,17 @@ class Play:
                     particle_color[:] = [0.5, 0.5, 0.5, 0.5]
                     particle_joint_values.append(particle)
                     particle_joint_colors.append(particle_color)
-            self.robot.updateViewerValues(cjvals, 
-                                          cjvels,
-                                          particle_joint_values,
-                                          particle_joint_colors)
-            for o in self.obstacles:
+            print "updating robot values"
+            self.environment.updateRobotValues(cjvals, 
+                                               cjvels,
+                                               particle_joint_values,
+                                               particle_joint_colors)
+            print "updated robot values"
+            '''for o in self.obstacles:
                 self.robot.setObstacleColor(o.getName(), 
                                             o.getStandardDiffuseColor(),
-                                            o.getStandardAmbientColor())            
+                                            o.getStandardAmbientColor()) '''
+            self.environment.setKinBodiesDefaultColor()           
             try:
                 if col[i] == True:                    
                     diffuse_col = v_double()
@@ -216,22 +226,19 @@ class Play:
             for obstacle in collidable_obstacles:
                 if obstacle.inCollisionDiscrete(collision_objects_goal):                               
                     return True, None
-            return False, None  
-        
-    def init_robot(self):
-        self.robot = Robot(self.robot_file)
-        self.robot_dof = self.robot.getDOF()        
-        return True  
+            return False, None 
     
     def init_environment(self):
-        self.obstacles = self.utils.loadObstaclesXML(self.environment_file)
-        goal_area = v_double()
-        self.utils.loadGoalArea(self.environment_file, goal_area)
-        if len(goal_area) == 0:
-            print "ERROR: Your environment file doesn't define a goal area"
-            return False
+        self.environment = Environment()
+        self.environment.setupEnvironment(self.environment_file)
+        self.environment.loadRobotFromURDF(self.robot_file)
+        self.robot = self.environment.getRobot()
+        self.robot_dof = self.robot.getDOF()
+        goal_area = v_double()        
+        self.environment.getGoalArea(goal_area)
         self.goal_position = [goal_area[i] for i in xrange(0, 3)]
-        self.goal_radius = goal_area[3]
+        self.goal_radius = goal_area[3]   
+        self.environment.showViewer()     
         return True    
         
 if __name__ == "__main__":

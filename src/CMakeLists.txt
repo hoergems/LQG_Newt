@@ -23,12 +23,22 @@ message ("CMAKE PREFIXPATH ${CMAKE_PREFIX_PATH}" )
 ##############################
 if (USE_URDF)       
     if(PKG_CONFIG_FOUND)
-        pkg_check_modules(URDF urdf)
-        if(NOT URDF_FOUND)
+        pkg_check_modules(URDFDOM urdfdom)
+        if(NOT URDFDOM_FOUND)
            message(FATAL_ERROR "URDF package could not be found")
         endif()
-        include_directories(${URDF_INCLUDE_DIRS})
-        link_directories(${URDF_LIBRARY_DIRS})    
+        include_directories(${URDFDOM_INCLUDE_DIRS})
+        link_directories(${URDFDOM_LIBRARY_DIRS})    
+    endif()
+    
+    if(PKG_CONFIG_FOUND)
+        pkg_check_modules(URDFDOM_HEADERS urdfdom_headers)
+        if(NOT URDFDOM_FOUND)
+           message(FATAL_ERROR "URDFDOM_HEADERS package could not be found")
+        endif()
+        include_directories(${URDFDOM_HEADERS_INCLUDE_DIRS})    
+        message("-- URDFDOM_HEADERS INCLUDE DIRS: ${URDFDOM_HEADERS_INCLUDE_DIRS}")
+    
     endif()
         
 ############################# LOAD OPENRAVE #############################
@@ -202,7 +212,7 @@ add_library(area SHARED
             Area.cpp)
 
 target_link_libraries (robot
-                       ${URDF_LIBRARIES}
+                       ${URDFDOM_LIBRARIES}
                        ${Boost_LIBRARIES}
                        ${PYTHON_LIBRARIES}
                        ${OPENRAVE_LIBRARIES}
@@ -217,7 +227,7 @@ target_link_libraries(path_planner
                       ${OPENRAVE_LIBRARIES}                   
                       ${OMPL_LIBRARIES}
                       ${FCL_LIBRARIES}                      
-                      ${URDF_LIBRARIES}
+                      ${URDFDOM_LIBRARIES}
                       ${VIEWER_LIBRARIES}
                       ${TINYXML_LIBRARIES}
                       ${RBDL_LIBRARIES})
@@ -229,7 +239,7 @@ target_link_libraries (dynamic_path_planner
                        ${PYTHON_LIBRARIES}                   
                        ${FCL_LIBRARIES}
                        ${TINYXML_LIBRARIES}
-                       ${URDF_LIBRARIES}
+                       ${URDFDOM_LIBRARIES}
                        ${VIEWER_LIBRARIES}
                        ${RBDL_LIBRARIES})                       
                       
