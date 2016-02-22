@@ -14,12 +14,16 @@ import sets
 import random
 import argparse
 from emd import emd
+from tabulate import tabulate
 
 class PlotStats:
     def __init__(self, dir, save_plots, show_particles, plot_emds):        
         if not os.path.isdir(dir):
             print "Error: Directory doesn't exist"
-            return       
+            return
+        self.cleanup(dir=dir) 
+        self.config_file = glob.glob(os.path.join(dir + "/config_*"))[0]
+              
         self.save = save_plots        
         serializer = Serializer()
         
@@ -28,6 +32,7 @@ class PlotStats:
         
         self.plot_bla(["collided", "Trans: Collision detected"], "collision_stats", dir=dir)
         self.plot_bla(["R:"], "reward_stats", dir=dir)
+        self.to_latex_table(dir=dir)
         
         logging.info("Plotting average distance to goal")
         try:        
@@ -86,7 +91,56 @@ class PlotStats:
        
         self.plot_emd_graph(serializer, cart_coords, dir=dir)
         logging.info("PlotStats: plotting histograms...")        
-        self.save_histogram_plots(serializer, cart_coords, dir=dir)'''    
+        self.save_histogram_plots(serializer, cart_coords, dir=dir)'''
+        
+    def cleanup(self, dir="stats"):
+        txtfiles = glob.glob(os.path.join(dir, "*.txt"))
+        for file in txtfiles:
+            print "removing " + file
+            try:
+                os.remove(file)
+            except:
+                pass
+        texfiles = glob.glob(os.path.join(dir, "*.tex"))        
+        for file in txtfiles:
+            try:
+                os.remove(file)
+            except Exception as e:
+                print e
+                pass
+        
+    def to_latex_table(self, dir="stats"):
+        files = glob.glob(os.path.join(dir, "out_*.txt"))
+        print files
+        for file in files:            
+            headers = []
+            table_entries = []
+            latex_filename = file.split("/")[-1].split(".txt")[0] + ".tex" 
+            cov = 0.0           
+            with open(file, "r") as f: 
+                lines = f.readlines()               
+                for i in xrange(len(lines)):
+                    if "alg" in lines[i]:
+                        headers.append(lines[i].strip().split(" ")[1])                        
+                        cov = float(lines[i].strip().split(" ")[2].split(":")[0])
+                        print headers
+                    else:
+                        value_found = False
+                        for k in xrange(len(table_entries)):
+                            if table_entries[k][0] == lines[i].strip().split(":")[0]:
+                                value_found = True
+                                table_entries[k].append(float(lines[i].strip().split(":")[1].strip()))
+                                break
+                        if not len(lines[i].split()) == 0:
+                            if not value_found:
+                                print lines[i].split()
+                                table_entries.append([lines[i].strip().split(":")[0], float(lines[i].strip().split(":")[1].strip())])
+                table = tabulate(table_entries, headers=headers, tablefmt="latex")
+                with open(os.path.join(dir, latex_filename), "a+") as f:
+                    f.write(table)
+                print table
+                    
+        sleep    
         
     def plot_emds(self, show_particles, dir="stats"):        
         files = glob.glob(os.path.join(os.path.join(dir, "*.log")))
@@ -318,7 +372,7 @@ class PlotStats:
             all_vals = []
             vals = []
             vals_per_run = []
-            file_str = file.split("/")[-1].split("_")[1]
+            file_str = "alg: " + file.split("/")[-1].split("_")[1]
             if not file_str in d:
                 d[file_str] = []           
             with open(file, "r") as f:
@@ -470,8 +524,13 @@ class PlotStats:
                             save=self.save,
                             filename=dir + "/" + output_file_str + ".png")
         
-    def setup_robot(self, dir='stats'):
-        robot_files = glob.glob(os.path.join(os.path.join(dir + "/model/", "*.urdf")))
+    def setup_robot(self, dir='stats'): 
+        with open(self.config_file, "r") as f:
+            for line in f.readlines():
+                if "robot_file:" in line:
+                    robot_filename = line.split(":")[1].strip()
+               
+        robot_files = glob.glob(os.path.join(os.path.join(dir + "/model/", robot_filename)))
         if len(robot_files) == 0:
             logging.error("Robot couldn't be initialized")
             return False
